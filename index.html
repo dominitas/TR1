@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TR1 Testas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TR1 Testas</h1>
+        <div class="note">Pasirinkite teisingą atsakymą ir paspauskite "Baigti testą" arba "Naujas testas".</div>
+        <form id="quizForm"></form>
+        <div style="text-align:center; margin-top:30px;">
+            <button type="button" onclick="checkQuiz()">Baigti testą</button>
+            <button type="button" onclick="generateQuiz()">Naujas testas</button>
+        </div>
+        <div id="result" class="result"></div>
+    </div>
+    <script>
+    // Visi 45 klausimai su atsakymais ir teisingo atsakymo indeksu
+    const questions = [
+        {q:"Kaip klasifikuojami žemės ūkio traktoriai?",a:["Pagal paskirtį, traukos klasę, liemenį ir važiuoklės konstrukciją","Pagal transmisiją, ratų skaičių, darbų pobūdį ir degalų rūšį","Pagal galios klasę, variklio tūrį, pavaro tipą ir kėbulo formą"],c:0},
+        {q:"Kokią techniką gali vairuoti TR1 kategorijos traktoriaus vairuotojas?",a:["Traktorius, kurių galia yra iki 45 kW","Traktorius, kurių galia yra iki 60 kW","Traktorius su vidaus degimo varikliais iki 2.5 litro"],c:1},
+        {q:"Iš kokių mechanizmų ir sistemų sudarytas keturtaktis vidaus degimo variklis?",a:["Stūmoklinio, kuro padavimo mechanizmo ir keturių pagalbinių sistemų","Alkūninio-švaistiklinio, dujų skirstymo mechanizmo ir keturių sistemų: aušinimo, tepimo, maitinimo ir paleidimo","Dujų skirstymo, stūmoklinio mechanizmo ir transmisijos, degimo, aušinimo bei filtravimo sistemų"],c:1},
+        {q:"Kas įsiurbiama į cilindrą dyzeliniame variklyje?",a:["Tik oras","Oras ir kuras vienu metu","Dyzelinas, kuris ten užsidega nuo slėgio"],c:0},
+        {q:"Kam skirtas smagratis?",a:["Skatina cilindrų slėgį ir variklio trauką","Naudojamas pavarų perjungimo metu","Mažina alkūninio veleno netolygumus ir kaupia mechaninę energiją"],c:2},
+        {q:"Koks skystis pilamas į variklio aušinimo sistemą?",a:["Stabdžių skystis arba specialus tepalas","Vanduo arba transmisinė alyva","Antifrizas (aušinimo skystis)"],c:2},
+        {q:"Kam skirtas ventiliatorius variklyje?",a:["Įsiurbia kurą į cilindrus","Palaiko teisingą degalų slėgį","Per orą aušina variklio detales"],c:2},
+        {q:"Kokie varikliai dažniausiai naudojami traktoriuose?",a:["Dyzeliniai","Elektriniai","Hibridiniai su benzininiu generatoriumi"],c:0},
+        {q:"Kokia alkūninio veleno paskirtis?",a:["Sumažinti trintį tarp stūmoklių ir cilindrų","Perduoti sukimo momentą smagračiui ir jėgos pavarai","Reguliuoti aušinimo skysčio tekėjimą"],c:1},
+        {q:"Kam reikalinga variklio aušinimo sistema?",a:["Užtikrina žvakės aušinimą","Apsaugo degalų siurblį nuo perkaitimo","Palaiko optimalų variklio detalių temperatūros režimą"],c:2},
+        {q:"Kam reikalinga pavarų dėžė?",a:["Pakeisti traukos jėgą, greitį ir kryptį","Reguliuoti variklio temperatūrą","Paleisti variklį"],c:0},
+        {q:"Kokius žinote srovės šaltinius?",a:["Kuro siurblys ir įtampos reguliatorius","Generatorius ir akumuliatorius","Relė ir starterio kontaktai"],c:1},
+        {q:"Kas sudaro varantįjį tiltą?",a:["Tik diferencialas ir pusašiai","Pagrindinė pavara, diferencialas, pusašiai ir galinės pavaros","Tvirtinimo šakės, sankaba ir velenas"],c:1},
+        {q:"Kam skirtas diferencialas?",a:["Vienodai paskirstyti apkrovą visiems ratams","Paskirstyti sukimo momentą į pusašius, leidžiant ratams suktis skirtingais greičiais","Suderinti variklio apsukas su transmisijos apsukomis"],c:1},
+        {q:"Ką reiškia 7 laipsnių pavarų dėžė?",a:["Transmisija su septyniais greičio režimais","Dėžė, kuri turi septynias sukimosi ašis","Pavarų dėžė, kurios greičiai reguliuojami temperatūra"],c:0},
+        {q:"Koks maksimalus akumuliatoriaus pakrovimo srovės dydis?",a:["12,6 V","14,5 V","16,8 V"],c:1},
+        {q:"Kam skirta laisvos eigos mova variklio paleidimo sistemoje?",a:["Užveda variklį šaltu oru","Leidžia starteriui veikti greičiau","Neleidžia starteriui suktis jau užvedus variklį"],c:2},
+        {q:"Kokios sistemos neturi dyzeliniai varikliai?",a:["Įpurškimo sistemos","Uždegimo sistemos","Aušinimo sistemos"],c:1},
+        {q:"Kokia yra ekonomiškiausia variklio darbinė temperatūra?",a:["65–75 °C","85–95 °C","100–110 °C"],c:1},
+        {q:"Kokios yra traktorių techninės priežiūros rūšys?",a:["Tik TA-1 ir TA-2","Tik kasdienė ir mėnesinė","Kasdienė, sezoninė, TA-1, TA-2, TA-3"],c:2},
+        {q:"Kokie darbai atliekami kasdieninės techninės priežiūros metu?",a:["Tik nuvalomas variklis","Tepalų, degalų lygio, padangų patikra, plovimas","Keičiama aušinimo sistema"],c:1},
+        {q:"Ar reikia periodiškai atlikti dyzelinio variklio alkūninio mechanizmo priežiūrą?",a:["Reikia tik pavasarį","Taip, tik po 200 motovalandų","Ne, nereikia"],c:2},
+        {q:"Kokia priemonė naudojama variklio vožtuvų tarpeliams matuoti?",a:["Tarpumačiai (plokštelės)","Kompresiometras","Mikrometras"],c:0},
+        {q:"Kodėl aušinimo skystis turi būti periodiškai keičiamas?",a:["Praranda spalvą","Praranda savo eksploatacines savybes","Užverda žemesnėje temperatūroje"],c:1},
+        {q:"Iš ko galima spręsti, kad vožtuvų šiluminiai tarpai per dideli?",a:["Trūksta aušinimo skysčio","Variklis dažnai užgęsta","Variklis sunkiai užsiveda ir girdisi papildomas triukšmas"],c:2},
+        {q:"Ką reikia pilti į akumuliatorių, jei mažas elektrolito lygis?",a:["Distiliuotą vandenį","Variklio alyvą","Aušinimo skystį"],c:0},
+        {q:"Kas yra pagrindiniai pneumatinės sėjamosios darbiniai elementai?",a:["Srauto maišyklė, ventiliatorius, presavimo velenas","Dozatorius, ventiliatorius, skirstytuvas","Sėklavamzdis, sparnuotė, filtravimo sietas"],c:1},
+        {q:"Kaip nustatomas sėjamosios ženklintuvo ilgis?",a:["Matuojamas visas sėjamosios darbinis plotis","Nuo ženklintuvo iki vidurinio noragėlio","Pusė darbinio pločio nuo kraštinio noragėlio iki ženklintuvo lėkštės"],c:2},
+        {q:"Kas vadinama variklio suslėgimo kameros tūriu?",a:["Cilindro tūris tarp stūmoklio ir galvutės","Tūris, kai stūmoklis nuo apatinio taško pasiekia viršutinį","Aušinimo kameros tūris"],c:1},
+        {q:"Kas yra detonacija?",a:["Lėtas mišinio degimas","Degimas, kai mišinys dega tolygiai","Mišinio degimas itin greitu tempu, viršijančiu normalų degimą"],c:2},
+        {q:"Kuris traktorius labiau suslegia dirvožemį?",a:["Vikšrinis","Ratinis","Abu vienodai"],c:1},
+        {q:"Kokios yra traktorių stabdžių pavaros?",a:["Tik mechaninės","Trinkelinės, diskines, juostinės pagal mechanizmą; mechaninės, hidraulinės, pneumatinės pagal tipą","Tik diskinės ir pneumatinės"],c:1},
+        {q:"Kas kiek metų rekomenduojama keisti stabdžių skystį?",a:["Kas metus","Kas 2 metus","Tik sugedus sistemai"],c:1},
+        {q:"Kurios iš šių savybių būdingos aušinimo skysčiui?",a:["Skatina apnašų kaupimąsi","Slopina putojimą, stabdo koroziją, gerina šilumos perdavimą","Padidina variklio degimo galią"],c:1},
+        {q:"Kaip tikrinamas generatoriaus diržo įtempimas?",a:["Spaudžiant diržą ranka","Patikrinama laisvumas ir garsas, jei skardena – įtempiamas","Patikrinamas su termometru"],c:1},
+        {q:"Kam reikalingi plūgų saugikliai?",a:["Išlygina vagų gylį","Apsaugo plūgo dalis nuo sulaužymo","Mažina plūgo svorį"],c:1},
+        {q:"Kuriais ratais užvažiuojama ant tašelių, reguliuojant nevartomą plūgą?",a:["Dešiniaisiais","Priekiniais","Kairiaisiais"],c:2},
+        {q:"Ar tinka universali alyva dyzeliniam varikliui?",a:["Ne, tik speciali dyzelinė","Taip, tinka universali alyva","Tik sintetinė alyva"],c:1},
+        {q:"Kaip sumažinti dirvos suslėgimą ir kokia séjos laiko reikšmė?",a:["Naudojamos siauros padangos","Dubliuojami ratai, sėjama optimaliausiu metu – per 6 d.","Naudojami galingesni traktoriai"],c:1},
+        {q:"Kurie posūkiai yra ekonomiškiausi galulaukėse?",a:["Uždara grybo kilpa ir trikampis posūkis","Bekilpis pusapskritimis, kriaušės formos kilpinis","Aštuoniukė ir sraigtinis kilpinis"],c:1},
+        {q:"Koks sėklos beicavimo tikslas?",a:["Palengvinti sėklų išsėjimą","Sumažinti dygimo laiką","Apsaugoti nuo ligų ir pagerinti daigumą"],c:2},
+        {q:"Kokia kaladėlė dedama po atraminiu plūgo ratuku, ruošiant 18 cm arimui?",a:["14 cm","16 cm","18 cm"],c:1},
+        {q:"Kaip paspartinti žolės džiūvimą šienapjūtės metu?",a:["Naudoti traktorius be priedų","Naudoti pjaunamąsias su traiškytuvais","Nupjauti žolę vakare"],c:1},
+        {q:"Kokia yra eismo dalyvių pareiga?",a:["Vengti važiuoti per miestą","Laikytis kelių eismo taisyklių","Duoti kelią tik pėstiesiems"],c:1},
+        {q:"Kiek yra kelio ženklų grupių ir kokios jos?",a:["5 grupės: įspėjamieji, draudžiamieji, nurodomieji, informaciniai, papildomi","9 grupės: įspėjamieji, pirmumo, draudžiamieji, nukreipiamieji, nurodomieji, informaciniai, paslaugų, papildomos lentelės, kintamos informacijos ženklai","4 grupės: pagrindiniai, papildomi, automatiniai, šviesoforiniai"],c:1},
+        {q:"Kaip skirstomos sankryžos?",a:["Tik į reguliuojamas ir nereguliuojamas","Reguliuojamos: šviesoforu, reguliuotojo; nereguliuojamos: lygiareikšmės, nelygiareikšmės, žiedinės","Tik šviesoforu ir reguliuotojo reguliuojamos"],c:1},
+        {q:"Kokia taisykle reikia vadovautis važiuojant per lygiareikšmes sankryžas?",a:["Kas važiuoja greičiau, tas pirmas","Dešinės rankos taisykle","Visada sustoti"],c:1},
+        {q:"Kada reikia sustoti prieš ženklą „STOP“?",a:["Tik esant kitam eismui","Visada","Tik jei nėra šviesoforo"],c:1},
+        {q:"Kokiu atstumu nuo geležinkelio pervažų draudžiama sustoti ir stovėti?",a:["30 metrų","70 metrų","50 metrų"],c:2},
+        {q:"Kokią įtaką vairuotojo dėmesiui ir reakcijai turi nuovargis?",a:["Reakcija tampa tikslesnė","Reakcijos laikas ilgėja","Pablogėja tik matomumas"],c:1},
+        {q:"Ar gali darbuotojas atsisakyti dirbti, jei pažeidžiamos darbuotojų saugos ir sveikatos normos?",a:["Negali, turi vykdyti darbdavio nurodymus","Gali","Gali tik su gydytojo leidimu"],c:1},
+        {q:"Kokiais gesintuvais draudžiama gesinti elektros įrengimus?",a:["Angliarūgštės","Milteliniais","Vandens - putų"],c:2},
+        {q:"Kaip suteikti pirmąją pagalbą nukentėjusiam nuo elektros smūgio?",a:["Duoti jam vandens","Atjungti elektros šaltinį ir, jei reikia, atlikti gaivinimą","Užpilti žaizdą dezinfekcija"],c:1},
+        {q:"Kaip suteikti pirmąją pagalbą apsinuodijus smalkėmis?",a:["Duoti jam anglies tablečių","Išnešti į lauką","Paguldyti į šiltą patalpą"],c:1},
+        {q:"Kaip skirstomi dirvožemiai pagal granuliometrinę (mechaninę) sudėtį?",a:["Tik pagal spalvą","Mikro, makro, mega ir trupinė struktūra","Lengvi, sunkūs ir labai sunkūs"],c:1},
+        {q:"Kokiomis priemonėmis galima pagerinti dirvožemio struktūrą?",a:["Tik laistant vandeniu","Organinėmis arba mineralinėmis trąšomis","Naudojant tik pesticidus"],c:1},
+        {q:"Išvardinkite augalus, kurie didina, atkuria ir palaiko dirvos derlingumą:",a:["Kryžmažiedžiai (ropės, kopūstai)","Ankštiniai augalai (pupos, žirniai)","Moliūgai ir agurkai"],c:1},
+        {q:"Kas yra pesticidai?",a:["Medžiagos trąšoms pagerinti","Cheminės medžiagos kenkėjams ir ligoms naikinti","Tik natūralios augalų sultys"],c:1},
+        {q:"Kada reikia keisti variklio alyvos filtrą?",a:["Kai traktorius netraukia","Kai keičiamas variklio diržas","Kai keičiama alyva"],c:2},
+        {q:"Kaip paruošiami laikyti plūgai?",a:["Paliekami lauke","Nuplaunami, užkonservuojami ir pastatomi į aikštelę","Nudažomi dažais"],c:1},
+        {q:"Kokie pagrindiniai variklinių alyvų skirtumai?",a:["Skiriasi tik kvapu","Skiriasi paskirtimi ir sudėtimi (mineralinė, pusiau sintetinė, sintetinė)","Tinka visiems varikliams be išimties"],c:1},
+        {q:"Kokie dažniausi traktoriaus hidraulinio keltuvo gedimai?",a:["Per didelis triukšmas","Vožtuvo užstrigimas, sistemos neveikimas","Sudyla pedalai"],c:1},
+        {q:"Kokius reikia atlikti traktoriaus vairavimo sistemos techninės priežiūros darbus?",a:["Tik patikrinti padangas","Tik papildyti alyvą","Patikrinti vairavimo traukių laisvumą"],c:2},
+        {q:"Kaip parinkti oro slėgį ratuose?",a:["Iš akies","Naudoti padangų slėgio matavimo prietaisą","Spausti padangą ranka"],c:1},
+        {q:"Kas yra pirmoji pagalba?",a:["Vaistų išrašymas gydytojo","Medicininė pagalba sunegalavusiam žmogui","Maisto davimas"],c:1},
+        {q:"Kokie pagrindiniai dokumentai reglamentuoja gaisrinę saugą?",a:["Statybos leidimai","Darbo sutartis","Gaisrinės saugos taisyklės"],c:2},
+        {q:"Kada „buksuoja“ sankaba?",a:["Kai per mažai spaudžiamas stabdis","Patekus tepalui ar sudilus frikciniam antdėklui","Kai svirtis neteisingai nustatyta"],c:1},
+        {q:"Nuo ko priklauso mėšlo iškratymo norma?",a:["Nuo metų laiko","Nuo trąšų kiekio","Nuo traktoriaus važiavimo ir transporterio greičio"],c:2},
+        {q:"Kuria traktoriaus pakabinimo mechanizmo dalimi reguliuojamas bulviakasės kasimo gylis?",a:["Dešine trauke","Hidrauliniu cilindru","Centrine trauke"],c:2},
+        {q:"Ką reiškia optimalus augalų apsaugos priemonių purškimo laikas?",a:["Kai piktžolės sužydėjusios","Kai nelyja","Laiku purškiant chemiją ant piktžolių"],c:2},
+        {q:"Kaip keičiamas lėkštinių skutikų darbo gylis?",a:["Padidinus traktoriaus greitį","Reguliuojant atakos kampą ir lėkščių svorį","Keičiant alyvą"],c:1},
+        {q:"Ką būtina atlikti nuimant traktoriaus ratą?",a:["Tik atsukti veržles","Išjungti variklį, įjungti rankinį stabdį, naudoti domkratą","Palikti variklį įjungtą"],c:1},
+        {q:"Ko siekiama darbo higienos taisyklėmis?",a:["Padidinti darbo krūvį","Apsaugoti organizmą nuo infekcijų ir palaikyti švarą","Sumažinti darbo laiką"],c:1},
+        {q:"Kokie būna dažniausiai pasitaikantys nelaimingi atsitikimai?",a:["Kritimai nuo pastato","Lengvi, vidutiniai","Tik sunkūs"],c:1}
+
+    ];
+    
+
+    // Fisher-Yates shuffle
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Sugeneruoti testą su 40 klausimų (35 + 5 atsitiktiniai)
+    let currentQuiz = [];
+    function generateQuiz() {
+        let all = questions.slice();
+        shuffle(all);
+        let mainQuestions = all.slice(0, 35);
+        let extraPool = all.slice(35);
+        shuffle(extraPool);
+        let extraQuestions = extraPool.slice(0, 5);
+        let quizQuestions = mainQuestions.concat(extraQuestions);
+        shuffle(quizQuestions);
+        currentQuiz = quizQuestions;
+        renderQuiz();
+        document.getElementById('result').innerHTML = '';
+    }
+
+    // Atvaizduoti klausimus
+    function renderQuiz() {
+        const form = document.getElementById('quizForm');
+        form.innerHTML = '';
+        currentQuiz.forEach((q, idx) => {
+            let block = document.createElement('div');
+            block.className = 'question';
+            let qDiv = document.createElement('div');
+            qDiv.textContent = (idx + 1) + '. ' + q.q;
+            block.appendChild(qDiv);
+
+            let answersDiv = document.createElement('div');
+            answersDiv.className = 'answers';
+            q.a.forEach((ans, i) => {
+                let label = document.createElement('label');
+                let input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'q' + idx;
+                input.value = i;
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(ans));
+                answersDiv.appendChild(label);
+            });
+            block.appendChild(answersDiv);
+            form.appendChild(block);
+        });
+    }
+
+    // Tikrinti atsakymus
+    function checkQuiz() {
+        let score = 0;
+        let total = currentQuiz.length;
+        document.querySelectorAll('.correct-answer, .wrong-answer').forEach(el => {
+            el.classList.remove('correct-answer', 'wrong-answer');
+        });
+        for (let i = 0; i < total; i++) {
+            let radios = document.getElementsByName('q' + i);
+            for (let radio of radios) {
+                let label = radio.parentElement;
+                if (radio.checked) {
+                    if (parseInt(radio.value) === currentQuiz[i].c) {
+                        score++;
+                        label.classList.add('correct-answer');
+                    } else {
+                        label.classList.add('wrong-answer');
+                    }
+                }
+                if (parseInt(radio.value) === currentQuiz[i].c) {
+                    label.classList.add('correct-answer');
+                }
+            }
+        }
+        document.getElementById('result').innerHTML = `Jūsų rezultatas: ${score} iš ${total}`;
+    }
+
+    // Sugeneruoti testą automatiškai pirmą kartą
+    generateQuiz();
+    </script>
+</body>
+</html>
